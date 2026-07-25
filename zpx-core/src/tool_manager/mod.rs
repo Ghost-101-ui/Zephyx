@@ -38,7 +38,7 @@ impl ToolManager {
     pub fn resolve(&self, tool_name: &str) -> Result<String> {
         // 1. Check System Installed (/usr/bin, PATH)
         if let Some(sys_path) = self.platform.find_system_binary(tool_name) {
-            info!(tool_name, path = ?sys_path, "Resolved binary from System PATH");
+            tracing::debug!(tool_name, path = ?sys_path, "Resolved binary from System PATH");
             return Ok(sys_path);
         }
 
@@ -46,7 +46,7 @@ impl ToolManager {
         let managed_path = self.workspace.get_managed_binary_path(tool_name);
         if managed_path.exists() {
             let path_str = managed_path.to_string_lossy().to_string();
-            info!(tool_name, path = ?path_str, "Resolved binary from ~/.zephyx/bin");
+            tracing::debug!(tool_name, path = ?path_str, "Resolved binary from ~/.zephyx/bin");
             return Ok(path_str);
         }
 

@@ -2,7 +2,6 @@ use anyhow::{Context, Result};
 use rusqlite::{params, Connection};
 use std::path::Path;
 use std::sync::{Arc, Mutex};
-use tracing::info;
 
 use crate::models::{
     AttackEdge, AttackNode, Evidence, Finding, FindingKind, JournalEntry, LogEntry, Priority, Recommendation,
@@ -175,7 +174,7 @@ impl DatabaseManager {
             ",
         )?;
 
-        info!("Database schema initialized with attack graph, evidence, snapshots, timeline, rule_packs, and installed_tools tables");
+        tracing::debug!("Database schema initialized with attack graph, evidence, snapshots, timeline, rule_packs, and installed_tools tables");
         Ok(())
     }
 
