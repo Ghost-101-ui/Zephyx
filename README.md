@@ -11,7 +11,7 @@
 [![Rust](https://img.shields.io/badge/Built%20with-Rust-E57324?style=flat-square&logo=rust)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20Windows%20%7C%20macOS-green?style=flat-square)](SUPPORTED_PLATFORMS.md)
-[![Version](https://img.shields.io/badge/Version-0.6.0-purple?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-0.6.3-purple?style=flat-square)](CHANGELOG.md)
 [![CTF Ready](https://img.shields.io/badge/CTF-Ready-red?style=flat-square)](docs/getting-started.md)
 [![Docs](https://img.shields.io/badge/Docs-Available-informational?style=flat-square)](docs/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](CONTRIBUTING.md)
@@ -334,7 +334,7 @@ sudo cp target/release/zpx /usr/local/bin/
 
 ### Portable Binary
 
-Pre-built binaries are available on [GitHub Releases](https://github.com/Ghost-101-ui/Zephyx/releases).
+Pre-built binaries for Linux, Windows, and macOS are available on [GitHub Releases](https://github.com/Ghost-101-ui/Zephyx/releases).
 
 ### Future Package Manager Support
 
@@ -342,6 +342,41 @@ Pre-built binaries are available on [GitHub Releases](https://github.com/Ghost-1
 # Planned (not yet available)
 cargo install zpx
 brew install zephyx/tap/zpx
+```
+
+---
+
+## 🔄 Self-Update
+
+Zephyx has a built-in self-update engine. It fetches the latest release from GitHub, verifies the SHA256 checksum, and replaces the binary automatically.
+
+### Check for updates
+```bash
+zpx update --check
+```
+
+### Apply the update
+```bash
+# Linux / macOS — user-local install (no sudo required)
+zpx update --self
+
+# Linux / macOS — system-wide install
+sudo zpx update --self
+
+# Windows (PowerShell — run as Administrator for system PATH)
+zpx update --self
+```
+
+> **Note (Linux/macOS):** If `zpx` is installed in a system directory (e.g. `/usr/local/bin`), running without `sudo` will **automatically fall back** to installing in `~/.local/bin` instead of failing. Make sure `~/.local/bin` is in your `$PATH`.
+
+### Force re-install current version
+```bash
+zpx update --self --force
+```
+
+### View build info
+```bash
+zpx update --info
 ```
 
 ---
