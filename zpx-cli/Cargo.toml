@@ -1,0 +1,22 @@
+[package]
+name = "zpx-cli"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "zpx"
+path = "src/main.rs"
+
+[dependencies]
+zpx-core = { path = "../zpx-core" }
+zpx-tui = { path = "../zpx-tui" }
+tokio.workspace = true
+clap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+anyhow.workspace = true
+chrono.workspace = true

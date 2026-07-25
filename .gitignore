@@ -1,0 +1,27 @@
+# Rust build artifacts
+/target/
+
+# Cargo lock (keep for binaries, remove for libraries — we keep it for workspace)
+# Cargo.lock
+
+# Editor and OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+
+# Zephyx runtime data (user's personal workspace — not committed)
+# These are generated at runtime in ~/.zephyx/
+# (nothing here to ignore — the workspace is in the user's home dir)
+
+# Log files
+*.log
+
+# Test output
+/test-output/
