@@ -20,9 +20,12 @@ use zpx_core::tool_manager::ToolManager;
 use zpx_core::workflow::{WorkflowEngine, WorkflowTemplate};
 use zpx_core::workspace::{CentralWorkspaceManager, WorkspaceManager};
 
+#[allow(dead_code)]
+mod updater;
+
 #[derive(Parser)]
 #[command(name = "zpx")]
-#[command(author, version = "0.6.0", about = "Zephyx — Extensible Cybersecurity Operating Platform (v0.6)", long_about = None)]
+#[command(author, version = "0.6.2", about = "Zephyx — Extensible Cybersecurity Operating Platform (v0.6)", long_about = None)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -90,8 +93,39 @@ enum Commands {
         #[command(subcommand)]
         ws_cmd: WorkspaceCommands,
     },
-    /// Update Zephyx registry and tool dependencies
-    Update,
+    /// Update Zephyx registry, tool dependencies, or self-update the binary
+    Update {
+        /// Self-update the Zephyx CLI binary to the latest GitHub release
+        #[arg(long)]
+        self_update: bool,
+        /// Force re-installation of current or latest version
+        #[arg(long)]
+        force: bool,
+        /// Check for available updates without downloading
+        #[arg(long)]
+        check: bool,
+        /// Print platform and build version information
+        #[arg(long)]
+        info: bool,
+        /// Run self-installer to place binary in system PATH
+        #[arg(long)]
+        install: bool,
+    },
+    /// Self-update Zephyx CLI binary from GitHub Releases
+    SelfUpdate {
+        /// Force re-installation of current or latest version
+        #[arg(long)]
+        force: bool,
+        /// Check for available updates without downloading
+        #[arg(long)]
+        check: bool,
+        /// Print platform and build version information
+        #[arg(long)]
+        info: bool,
+        /// Run self-installer to place binary in system PATH
+        #[arg(long)]
+        install: bool,
+    },
     /// View or edit Zephyx system configuration
     Config,
     /// Manage tool plugins & marketplace
@@ -480,9 +514,48 @@ async fn main() -> Result<()> {
                 println!("  SQLite Master DB:  {:?}", central_ws.get_database_path());
             }
         },
-        Commands::Update => {
-            println!("Updating Zephyx tool catalog and central registry...");
-            println!("All catalogs up to date.");
+        Commands::Update { self_update, force, check, info, install } => {
+            if info {
+                updater::print_version_info();
+            } else if install {
+                if let Err(e) = updater::self_install() {
+                    eprintln!("Self-install failed: {}", e);
+                }
+            } else if self_update {
+                if check {
+                    match updater::check_for_update() {
+                        Ok(Some(v)) => println!("Update available: v{}", v),
+                        Ok(None) => println!("Zephyx is up to date (v{}).", env!("CARGO_PKG_VERSION")),
+                        Err(e) => eprintln!("Failed to check for updates: {}", e),
+                    }
+                } else {
+                    if let Err(e) = updater::perform_self_update(force) {
+                        eprintln!("Self-update failed: {}", e);
+                    }
+                }
+            } else {
+                println!("Updating Zephyx tool catalog and central registry...");
+                println!("All catalogs up to date.");
+            }
+        }
+        Commands::SelfUpdate { force, check, info, install } => {
+            if info {
+                updater::print_version_info();
+            } else if install {
+                if let Err(e) = updater::self_install() {
+                    eprintln!("Self-install failed: {}", e);
+                }
+            } else if check {
+                match updater::check_for_update() {
+                    Ok(Some(v)) => println!("Update available: v{}", v),
+                    Ok(None) => println!("Zephyx is up to date (v{}).", env!("CARGO_PKG_VERSION")),
+                    Err(e) => eprintln!("Failed to check for updates: {}", e),
+                }
+            } else {
+                if let Err(e) = updater::perform_self_update(force) {
+                    eprintln!("Self-update failed: {}", e);
+                }
+            }
         }
         Commands::Config => {
             println!("Zephyx Configuration (~/.zephyx/config/config.yaml):");

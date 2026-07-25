@@ -110,6 +110,6 @@ Planned features:
 
 ## Tracking Progress
 
-Issues and PRs related to each milestone are tracked on the [GitHub Project Board](https://github.com/zephyx/zephyx/projects).
+Issues and PRs related to each milestone are tracked on the [GitHub Project Board](https://github.com/Ghost-101-ui/Zephyx/projects).
 
 To contribute to an upcoming milestone, check the [Contributing Guide](CONTRIBUTING.md) and look for issues labeled `milestone: v0.7` or `good first issue`.

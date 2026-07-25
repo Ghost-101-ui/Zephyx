@@ -1,0 +1,52 @@
+name: Docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'README.md'
+      - '*.md'
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'README.md'
+      - '*.md'
+
+jobs:
+  # ─────────────────────────────────────────────────────────────
+  # Validate all markdown links
+  # ─────────────────────────────────────────────────────────────
+  check-links:
+    name: "Check Markdown Links"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
+          config-file: '.github/mlc_config.json'
+        continue-on-error: true
+
+  # ─────────────────────────────────────────────────────────────
+  # Generate Rust API docs
+  # ─────────────────────────────────────────────────────────────
+  rustdoc:
+    name: "Rust API Docs"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Generate API docs
+        run: |
+          cargo doc --workspace --no-deps --document-private-items
+        env:
+          RUSTDOCFLAGS: "--deny broken_intra_doc_links"

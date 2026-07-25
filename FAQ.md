@@ -174,4 +174,4 @@ A: Run `zpx session list` to see available sessions and their IDs. Session IDs l
 
 ---
 
-For more help, see [docs/troubleshooting.md](docs/troubleshooting.md) or open a [GitHub Issue](https://github.com/zephyx/zephyx/issues).
+For more help, see [docs/troubleshooting.md](docs/troubleshooting.md) or open a [GitHub Issue](https://github.com/Ghost-101-ui/Zephyx/issues).

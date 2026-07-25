@@ -20,4 +20,4 @@ See [ROADMAP.md](../ROADMAP.md) for the full, up-to-date project roadmap.
 
 ---
 
-For tracking active issues and milestone progress, see the [GitHub Projects board](https://github.com/zephyx/zephyx/projects).
+For tracking active issues and milestone progress, see the [GitHub Projects board](https://github.com/Ghost-101-ui/Zephyx/projects).

@@ -20,8 +20,8 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source $HOME/.cargo/env
 
 # Clone and build
-git clone https://github.com/zephyx/zephyx.git
-cd zephyx && cargo build --release
+git clone https://github.com/Ghost-101-ui/Zephyx.git
+cd Zephyx && cargo build --release
 sudo cp target/release/zpx /usr/local/bin/
 
 # Verify

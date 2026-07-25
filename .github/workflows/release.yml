@@ -1,0 +1,470 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+# ══════════════════════════════════════════════════════════════════
+# LINUX AMD64
+# ══════════════════════════════════════════════════════════════════
+jobs:
+  build-linux-amd64:
+    name: "Build · Linux AMD64"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-gnu
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: release-linux-amd64
+
+      - name: Extract version
+        id: ver
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build binary
+        run: |
+          cargo build --release --bin zpx --target x86_64-unknown-linux-gnu
+
+      - name: Package .tar.gz
+        run: |
+          VER=${{ steps.ver.outputs.VERSION }}
+          mkdir -p dist
+          cp target/x86_64-unknown-linux-gnu/release/zpx dist/zpx
+          chmod +x dist/zpx
+          cd dist && tar -czf "../Zephyx-${VER}-linux-amd64.tar.gz" zpx
+
+      - name: Package .deb
+        run: |
+          VER=${{ steps.ver.outputs.VERSION }}
+          chmod +x packaging/linux/build-deb.sh
+          packaging/linux/build-deb.sh \
+            target/x86_64-unknown-linux-gnu/release/zpx \
+            "${VER}" \
+            amd64 \
+            "Zephyx-${VER}-linux-amd64.deb"
+
+      - name: Generate checksums
+        run: |
+          VER=${{ steps.ver.outputs.VERSION }}
+          sha256sum "Zephyx-${VER}-linux-amd64.tar.gz" \
+                    "Zephyx-${VER}-linux-amd64.deb" \
+            > checksums-linux-amd64.txt
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-amd64
+          path: |
+            Zephyx-*-linux-amd64.*
+            checksums-linux-amd64.txt
+
+# ══════════════════════════════════════════════════════════════════
+# LINUX ARM64
+# ══════════════════════════════════════════════════════════════════
+  build-linux-arm64:
+    name: "Build · Linux ARM64"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-unknown-linux-gnu
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: release-linux-arm64
+
+      - name: Install GCC cross-compiler
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+
+      - name: Extract version
+        id: ver
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build binary (cross-compile)
+        env:
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
+        run: |
+          cargo build --release --bin zpx --target aarch64-unknown-linux-gnu
+
+      - name: Package .tar.gz
+        run: |
+          VER=${{ steps.ver.outputs.VERSION }}
+          mkdir -p dist
+          cp target/aarch64-unknown-linux-gnu/release/zpx dist/zpx
+          chmod +x dist/zpx
+          cd dist && tar -czf "../Zephyx-${VER}-linux-arm64.tar.gz" zpx
+
+      - name: Package .deb
+        run: |
+          VER=${{ steps.ver.outputs.VERSION }}
+          chmod +x packaging/linux/build-deb.sh
+          packaging/linux/build-deb.sh \
+            target/aarch64-unknown-linux-gnu/release/zpx \
+            "${VER}" \
+            arm64 \
+            "Zephyx-${VER}-linux-arm64.deb"
+
+      - name: Generate checksums
+        run: |
+          VER=${{ steps.ver.outputs.VERSION }}
+          sha256sum "Zephyx-${VER}-linux-arm64.tar.gz" \
+                    "Zephyx-${VER}-linux-arm64.deb" \
+            > checksums-linux-arm64.txt
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-arm64
+          path: |
+            Zephyx-*-linux-arm64.*
+            checksums-linux-arm64.txt
+
+# ══════════════════════════════════════════════════════════════════
+# WINDOWS x64
+# ══════════════════════════════════════════════════════════════════
+  build-windows:
+    name: "Build · Windows x64"
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: release-windows-x64
+
+      - name: Extract version
+        id: ver
+        shell: bash
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build binary
+        run: cargo build --release --bin zpx
+
+      - name: Install NSIS
+        run: choco install nsis --yes --no-progress
+
+      - name: Build NSIS installer
+        shell: pwsh
+        run: |
+          $ver = "${{ steps.ver.outputs.VERSION }}"
+          Copy-Item "target\release\zpx.exe" "packaging\windows\zpx.exe" -Force
+          & 'C:\Program Files (x86)\NSIS\makensis.exe' /DVERSION=$ver packaging\windows\installer.nsi
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          Move-Item "packaging\windows\Zephyx-${ver}-windows-x64-setup.exe" "Zephyx-${ver}-windows-x64-setup.exe"
+
+      - name: Package portable ZIP
+        shell: pwsh
+        run: |
+          $ver = "${{ steps.ver.outputs.VERSION }}"
+          Compress-Archive -Path "target\release\zpx.exe" `
+            -DestinationPath "Zephyx-${ver}-windows-x64.zip"
+
+      - name: Generate checksums
+        shell: pwsh
+        run: |
+          $ver = "${{ steps.ver.outputs.VERSION }}"
+          $items = @(
+            "Zephyx-${ver}-windows-x64-setup.exe",
+            "Zephyx-${ver}-windows-x64.zip"
+          )
+          $lines = foreach ($f in $items) {
+            $hash = (Get-FileHash $f -Algorithm SHA256).Hash.ToLower()
+            "$hash  $f"
+          }
+          $lines | Set-Content checksums-windows.txt -Encoding UTF8
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64
+          path: |
+            Zephyx-*-windows-x64*
+            checksums-windows.txt
+
+# ══════════════════════════════════════════════════════════════════
+# macOS INTEL
+# ══════════════════════════════════════════════════════════════════
+  build-macos-intel:
+    name: "Build · macOS Intel"
+    runs-on: macos-13
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-apple-darwin
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: release-macos-intel
+
+      - name: Extract version
+        id: ver
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build binary
+        run: cargo build --release --bin zpx --target x86_64-apple-darwin
+
+      - name: Package .tar.gz
+        run: |
+          VER=${{ steps.ver.outputs.VERSION }}
+          mkdir -p dist
+          cp target/x86_64-apple-darwin/release/zpx dist/zpx
+          chmod +x dist/zpx
+          cd dist && tar -czf "../Zephyx-${VER}-macos-intel.tar.gz" zpx
+
+      - name: Package .pkg
+        run: |
+          VER=${{ steps.ver.outputs.VERSION }}
+          chmod +x packaging/macos/build-pkg.sh
+          packaging/macos/build-pkg.sh \
+            target/x86_64-apple-darwin/release/zpx \
+            "${VER}" \
+            "Zephyx-${VER}-macos-intel.pkg"
+
+      - name: Generate checksums
+        run: |
+          VER=${{ steps.ver.outputs.VERSION }}
+          shasum -a 256 "Zephyx-${VER}-macos-intel.tar.gz" \
+                        "Zephyx-${VER}-macos-intel.pkg" \
+            > checksums-macos-intel.txt
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-intel
+          path: |
+            Zephyx-*-macos-intel.*
+            checksums-macos-intel.txt
+
+# ══════════════════════════════════════════════════════════════════
+# macOS APPLE SILICON
+# ══════════════════════════════════════════════════════════════════
+  build-macos-arm:
+    name: "Build · macOS Apple Silicon"
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: release-macos-arm
+
+      - name: Extract version
+        id: ver
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build binary
+        run: cargo build --release --bin zpx --target aarch64-apple-darwin
+
+      - name: Package .tar.gz
+        run: |
+          VER=${{ steps.ver.outputs.VERSION }}
+          mkdir -p dist
+          cp target/aarch64-apple-darwin/release/zpx dist/zpx
+          chmod +x dist/zpx
+          cd dist && tar -czf "../Zephyx-${VER}-macos-arm.tar.gz" zpx
+
+      - name: Package .pkg
+        run: |
+          VER=${{ steps.ver.outputs.VERSION }}
+          chmod +x packaging/macos/build-pkg.sh
+          packaging/macos/build-pkg.sh \
+            target/aarch64-apple-darwin/release/zpx \
+            "${VER}" \
+            "Zephyx-${VER}-macos-arm.pkg"
+
+      - name: Generate checksums
+        run: |
+          VER=${{ steps.ver.outputs.VERSION }}
+          shasum -a 256 "Zephyx-${VER}-macos-arm.tar.gz" \
+                        "Zephyx-${VER}-macos-arm.pkg" \
+            > checksums-macos-arm.txt
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-arm
+          path: |
+            Zephyx-*-macos-arm.*
+            checksums-macos-arm.txt
+
+# ══════════════════════════════════════════════════════════════════
+# PUBLISH GITHUB RELEASE
+# ══════════════════════════════════════════════════════════════════
+  release:
+    name: "Publish Release"
+    needs:
+      - build-linux-amd64
+      - build-linux-arm64
+      - build-windows
+      - build-macos-intel
+      - build-macos-arm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract version
+        id: ver
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Flatten artifact directories
+        run: |
+          find artifacts/ -type f \( \
+            -name "*.deb" -o \
+            -name "*.tar.gz" -o \
+            -name "*.exe" -o \
+            -name "*.zip" -o \
+            -name "*.pkg" -o \
+            -name "checksums-*.txt" \
+          \) -exec mv {} release-assets/ \; 2>/dev/null || true
+          mkdir -p release-assets
+          find artifacts/ -type f \( \
+            -name "*.deb" -o \
+            -name "*.tar.gz" -o \
+            -name "*.exe" -o \
+            -name "*.zip" -o \
+            -name "*.pkg" -o \
+            -name "checksums-*.txt" \
+          \) -exec cp {} release-assets/ \;
+
+      - name: Merge all checksums
+        run: |
+          VER=${{ steps.ver.outputs.VERSION }}
+          {
+            echo "# SHA256 Checksums — Zephyx v${VER}"
+            echo "#"
+            echo "# Verify on Linux/macOS:"
+            echo "#   sha256sum --check checksums.txt"
+            echo "#"
+            echo "# Verify on Windows (PowerShell):"
+            echo "#   Get-FileHash <file> -Algorithm SHA256"
+            echo ""
+            cat release-assets/checksums-*.txt
+          } > release-assets/checksums.txt
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          VER=${{ steps.ver.outputs.VERSION }}
+          cat > release-assets/release-notes.md << NOTES
+          ## ⚡ Zephyx v${VER}
+
+          > Extensible Cybersecurity Operating Platform — workflow-driven, intelligence-augmented.
+
+          ---
+
+          ### 📦 Downloads
+
+          | Platform | Package | Portable |
+          |---|---|---|
+          | 🐧 Linux x86_64 | [Zephyx-${VER}-linux-amd64.deb](https://github.com/Ghost-101-ui/Zephyx/releases/download/v${VER}/Zephyx-${VER}-linux-amd64.deb) | [.tar.gz](https://github.com/Ghost-101-ui/Zephyx/releases/download/v${VER}/Zephyx-${VER}-linux-amd64.tar.gz) |
+          | 🐧 Linux ARM64 | [Zephyx-${VER}-linux-arm64.deb](https://github.com/Ghost-101-ui/Zephyx/releases/download/v${VER}/Zephyx-${VER}-linux-arm64.deb) | [.tar.gz](https://github.com/Ghost-101-ui/Zephyx/releases/download/v${VER}/Zephyx-${VER}-linux-arm64.tar.gz) |
+          | 🪟 Windows x64 | [Zephyx-${VER}-windows-x64-setup.exe](https://github.com/Ghost-101-ui/Zephyx/releases/download/v${VER}/Zephyx-${VER}-windows-x64-setup.exe) | [.zip](https://github.com/Ghost-101-ui/Zephyx/releases/download/v${VER}/Zephyx-${VER}-windows-x64.zip) |
+          | 🍎 macOS Intel | [Zephyx-${VER}-macos-intel.pkg](https://github.com/Ghost-101-ui/Zephyx/releases/download/v${VER}/Zephyx-${VER}-macos-intel.pkg) | [.tar.gz](https://github.com/Ghost-101-ui/Zephyx/releases/download/v${VER}/Zephyx-${VER}-macos-intel.tar.gz) |
+          | 🍎 macOS Apple Silicon | [Zephyx-${VER}-macos-arm.pkg](https://github.com/Ghost-101-ui/Zephyx/releases/download/v${VER}/Zephyx-${VER}-macos-arm.pkg) | [.tar.gz](https://github.com/Ghost-101-ui/Zephyx/releases/download/v${VER}/Zephyx-${VER}-macos-arm.tar.gz) |
+
+          ---
+
+          ### 🚀 Quick Install
+
+          **Linux / macOS (one-liner):**
+          \`\`\`bash
+          curl -fsSL https://raw.githubusercontent.com/Ghost-101-ui/Zephyx/main/scripts/install.sh | sh
+          \`\`\`
+
+          **Windows (PowerShell):**
+          \`\`\`powershell
+          irm https://raw.githubusercontent.com/Ghost-101-ui/Zephyx/main/scripts/install.ps1 | iex
+          \`\`\`
+
+          **Linux .deb:**
+          \`\`\`bash
+          wget https://github.com/Ghost-101-ui/Zephyx/releases/download/v${VER}/Zephyx-${VER}-linux-amd64.deb
+          sudo dpkg -i Zephyx-${VER}-linux-amd64.deb
+          zpx init
+          \`\`\`
+
+          ---
+
+          ### 🔐 Verify Checksums
+
+          Download \`checksums.txt\` and verify:
+          \`\`\`bash
+          sha256sum --check checksums.txt
+          \`\`\`
+
+          ---
+
+          ### 🆕 What's Changed
+
+          See [CHANGELOG.md](https://github.com/Ghost-101-ui/Zephyx/blob/main/CHANGELOG.md) for full details.
+
+          ---
+
+          ### ⚠️ Authorized Use Only
+
+          Zephyx is designed for authorized penetration testing, CTF competitions, and educational security research.
+          NOTES
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "⚡ Zephyx v${{ steps.ver.outputs.VERSION }}"
+          body_path: release-assets/release-notes.md
+          draft: false
+          prerelease: false
+          make_latest: true
+          files: |
+            release-assets/*.deb
+            release-assets/*.tar.gz
+            release-assets/*.exe
+            release-assets/*.zip
+            release-assets/*.pkg
+            release-assets/checksums.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

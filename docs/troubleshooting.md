@@ -159,7 +159,7 @@ zpx session resume session-id
 1. Run `zpx doctor` for a system health check
 2. Enable debug logging: `RUST_LOG=debug zpx <command>`
 3. Check [FAQ.md](../FAQ.md) for common questions
-4. Open a [GitHub Issue](https://github.com/zephyx/zephyx/issues) with:
+4. Open a [GitHub Issue](https://github.com/Ghost-101-ui/Zephyx/issues) with:
    - `zpx --version` output
    - Operating system and version
    - Full error message

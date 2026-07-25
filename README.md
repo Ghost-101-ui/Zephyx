@@ -279,7 +279,7 @@ source $HOME/.cargo/env
 
 # Clone the repository
 git clone https://github.com/Ghost-101-ui/Zephyx.git
-cd zephyx
+cd Zephyx
 
 # Build release binary
 cargo build --release --bin zpx
@@ -297,7 +297,7 @@ zpx --version
 sudo apt update && sudo apt install -y build-essential curl
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 git clone https://github.com/Ghost-101-ui/Zephyx.git
-cd zephyx && cargo build --release
+cd Zephyx && cargo build --release
 sudo cp target/release/zpx /usr/local/bin/
 ```
 
@@ -306,7 +306,7 @@ sudo cp target/release/zpx /usr/local/bin/
 ```powershell
 # Install Rust from https://rustup.rs, then:
 git clone https://github.com/Ghost-101-ui/Zephyx.git
-cd zephyx
+cd Zephyx
 cargo build --release --bin zpx
 # Binary at: .\target\release\zpx.exe
 ```
@@ -316,13 +316,13 @@ cargo build --release --bin zpx
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 git clone https://github.com/Ghost-101-ui/Zephyx.git
-cd zephyx && cargo build --release
+cd Zephyx && cargo build --release
 sudo cp target/release/zpx /usr/local/bin/
 ```
 
 ### Portable Binary
 
-Pre-built binaries are available on [GitHub Releases](https://github.com/zephyx/zephyx/releases).
+Pre-built binaries are available on [GitHub Releases](https://github.com/Ghost-101-ui/Zephyx/releases).
 
 ### Future Package Manager Support
 

@@ -101,7 +101,7 @@ tar -czf zpx-v0.7.0-macos-universal.tar.gz zpx
 
 ## GitHub Release
 
-1. Go to [GitHub Releases](https://github.com/zephyx/zephyx/releases/new)
+1. Go to [GitHub Releases](https://github.com/Ghost-101-ui/Zephyx/releases/new)
 2. Select the tag `v0.7.0`
 3. Set title: `Zephyx v0.7.0 — Distributed Platform`
 4. Copy the relevant section from `CHANGELOG.md` as the description

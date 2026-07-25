@@ -32,7 +32,7 @@ source $HOME/.cargo/env
 ## Method 1: Install via Cargo (Recommended)
 
 ```bash
-cargo install --git https://github.com/zephyx/zephyx.git --bin zpx
+cargo install --git https://github.com/Ghost-101-ui/Zephyx.git --bin zpx
 ```
 
 This compiles and installs the `zpx` binary to `~/.cargo/bin/zpx`.
@@ -43,8 +43,8 @@ This compiles and installs the `zpx` binary to `~/.cargo/bin/zpx`.
 
 ```bash
 # Clone
-git clone https://github.com/zephyx/zephyx.git
-cd zephyx
+git clone https://github.com/Ghost-101-ui/Zephyx.git
+cd Zephyx
 
 # Build release binary
 cargo build --release --bin zpx
@@ -69,12 +69,12 @@ cp target/release/zpx ~/.local/bin/
 
 ## Method 3: Portable Binary (Pre-built)
 
-Download the pre-built binary for your platform from the [GitHub Releases](https://github.com/zephyx/zephyx/releases) page.
+Download the pre-built binary for your platform from the [GitHub Releases](https://github.com/Ghost-101-ui/Zephyx/releases) page.
 
 ```bash
 # Linux (example)
-wget https://github.com/zephyx/zephyx/releases/latest/download/zpx-linux-x86_64.tar.gz
-tar -xzf zpx-linux-x86_64.tar.gz
+wget https://github.com/Ghost-101-ui/Zephyx/releases/latest/download/Zephyx-0.6.2-linux-amd64.tar.gz
+tar -xzf Zephyx-0.6.2-linux-amd64.tar.gz
 chmod +x zpx
 sudo mv zpx /usr/local/bin/
 ```
@@ -95,8 +95,8 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source $HOME/.cargo/env
 
 # Clone and build
-git clone https://github.com/zephyx/zephyx.git
-cd zephyx
+git clone https://github.com/Ghost-101-ui/Zephyx.git
+cd Zephyx
 cargo build --release --bin zpx
 
 # Install
@@ -115,8 +115,8 @@ zpx --version
 3. Open PowerShell:
 
 ```powershell
-git clone https://github.com/zephyx/zephyx.git
-cd zephyx
+git clone https://github.com/Ghost-101-ui/Zephyx.git
+cd Zephyx
 cargo build --release --bin zpx
 # Binary: .\target\release\zpx.exe
 
@@ -131,8 +131,8 @@ $env:PATH += ";$PWD\target\release"
 sudo apt update && sudo apt install -y build-essential curl git
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source $HOME/.cargo/env
-git clone https://github.com/zephyx/zephyx.git
-cd zephyx && cargo build --release
+git clone https://github.com/Ghost-101-ui/Zephyx.git
+cd Zephyx && cargo build --release
 sudo cp target/release/zpx /usr/local/bin/
 ```
 
@@ -149,8 +149,8 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source $HOME/.cargo/env
 
 # Clone and build
-git clone https://github.com/zephyx/zephyx.git
-cd zephyx
+git clone https://github.com/Ghost-101-ui/Zephyx.git
+cd Zephyx
 cargo build --release --bin zpx
 
 # Install
@@ -165,7 +165,7 @@ sudo cp target/release/zpx /usr/local/bin/
 
 ```bash
 zpx --version
-# Expected: zpx 0.6.0
+# Expected: zpx 0.6.2
 
 zpx doctor
 # Expected: System health report with tool status
@@ -179,7 +179,7 @@ zpx doctor
 
 ```bash
 # Homebrew (macOS / Linux)
-brew install zephyx/tap/zpx
+brew install Ghost-101-ui/tap/zpx
 
 # Cargo (crates.io)
 cargo install zpx

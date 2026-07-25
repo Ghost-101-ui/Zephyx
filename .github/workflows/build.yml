@@ -1,0 +1,127 @@
+name: Build & CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
+      - '.github/workflows/security.yml'
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  # ─────────────────────────────────────────────────────────────
+  # Format + Lint (fast feedback)
+  # ─────────────────────────────────────────────────────────────
+  lint:
+    name: "Lint · Format & Clippy"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust (stable + components)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Check formatting
+        run: cargo fmt --all --check
+
+      - name: Run Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+  # ─────────────────────────────────────────────────────────────
+  # Build matrix (Linux, Windows, macOS)
+  # ─────────────────────────────────────────────────────────────
+  build:
+    name: "Build · ${{ matrix.os }}"
+    needs: lint
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: Linux
+            runner: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - os: Windows
+            runner: windows-latest
+            target: x86_64-pc-windows-msvc
+          - os: macOS
+            runner: macos-latest
+            target: aarch64-apple-darwin
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: build-${{ matrix.os }}
+
+      - name: cargo check
+        run: cargo check --workspace --all-targets --target ${{ matrix.target }}
+
+      - name: cargo build (dev)
+        run: cargo build --bin zpx --target ${{ matrix.target }}
+
+  # ─────────────────────────────────────────────────────────────
+  # Tests
+  # ─────────────────────────────────────────────────────────────
+  test:
+    name: "Test · Linux"
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run all tests
+        run: cargo test --workspace --all-targets
+
+  # ─────────────────────────────────────────────────────────────
+  # Build release binary (Linux, smoke test)
+  # ─────────────────────────────────────────────────────────────
+  build-release:
+    name: "Release Build Smoke Test"
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build release binary
+        run: cargo build --release --bin zpx
+
+      - name: Smoke test — version
+        run: ./target/release/zpx --version
+
+      - name: Smoke test — help
+        run: ./target/release/zpx --help

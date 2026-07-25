@@ -1,0 +1,59 @@
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly security scan every Monday at 03:00 UTC
+    - cron: '0 3 * * 1'
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  # ─────────────────────────────────────────────────────────────
+  # cargo audit — dependency vulnerability scan
+  # ─────────────────────────────────────────────────────────────
+  cargo-audit:
+    name: "Dependency Audit"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --locked
+
+      - name: Audit dependencies
+        run: cargo audit
+
+  # ─────────────────────────────────────────────────────────────
+  # cargo deny — license + bans + advisories
+  # ─────────────────────────────────────────────────────────────
+  cargo-deny:
+    name: "License & Policy Check"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: cargo deny check
+        uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check advisories licenses bans
+        continue-on-error: true   # Non-blocking on license warnings
+
+  # ─────────────────────────────────────────────────────────────
+  # Dependency review on PRs
+  # ─────────────────────────────────────────────────────────────
+  dependency-review:
+    name: "PR Dependency Review"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v4

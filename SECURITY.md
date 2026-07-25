@@ -20,7 +20,7 @@ If you discover a security vulnerability in Zephyx, please report it responsibly
 
 ### Option 1: GitHub Private Security Advisory (Preferred)
 
-Use GitHub's [Private Security Advisory](https://github.com/zephyx/zephyx/security/advisories/new) feature to report the vulnerability confidentially.
+Use GitHub's [Private Security Advisory](https://github.com/Ghost-101-ui/Zephyx/security/advisories/new) feature to report the vulnerability confidentially.
 
 ### Option 2: Email
 

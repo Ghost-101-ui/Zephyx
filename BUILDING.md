@@ -16,8 +16,8 @@ This guide explains how to build Zephyx from source for development and producti
 ## Clone the Repository
 
 ```bash
-git clone https://github.com/zephyx/zephyx.git
-cd zephyx
+git clone https://github.com/Ghost-101-ui/Zephyx.git
+cd Zephyx
 ```
 
 ---
