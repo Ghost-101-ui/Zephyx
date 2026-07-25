@@ -176,12 +176,13 @@ pub fn perform_self_update(force: bool) -> Result<()> {
         println!("  ↑ Update available: v{} → v{}", CURRENT_VERSION, latest_tag);
     }
 
-    // Find the asset for this platform
+    // Find the asset for this platform (exact match or fallback to platform tag + archive extension)
     let target_name = asset_name(latest_tag);
+    let ext = archive_ext();
     let asset = release
         .assets
         .iter()
-        .find(|a| a.name == target_name)
+        .find(|a| a.name == target_name || (a.name.contains(platform) && a.name.ends_with(ext)))
         .ok_or_else(|| {
             anyhow!(
                 "No release asset found for platform '{}' (expected: {})",
