@@ -278,7 +278,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source $HOME/.cargo/env
 
 # Clone the repository
-git clone https://github.com/zephyx/zephyx.git
+git clone https://github.com/Ghost-101-ui/Zephyx.git
 cd zephyx
 
 # Build release binary
@@ -296,7 +296,7 @@ zpx --version
 ```bash
 sudo apt update && sudo apt install -y build-essential curl
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-git clone https://github.com/zephyx/zephyx.git
+git clone https://github.com/Ghost-101-ui/Zephyx.git
 cd zephyx && cargo build --release
 sudo cp target/release/zpx /usr/local/bin/
 ```
@@ -305,7 +305,7 @@ sudo cp target/release/zpx /usr/local/bin/
 
 ```powershell
 # Install Rust from https://rustup.rs, then:
-git clone https://github.com/zephyx/zephyx.git
+git clone https://github.com/Ghost-101-ui/Zephyx.git
 cd zephyx
 cargo build --release --bin zpx
 # Binary at: .\target\release\zpx.exe
@@ -315,7 +315,7 @@ cargo build --release --bin zpx
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-git clone https://github.com/zephyx/zephyx.git
+git clone https://github.com/Ghost-101-ui/Zephyx.git
 cd zephyx && cargo build --release
 sudo cp target/release/zpx /usr/local/bin/
 ```
