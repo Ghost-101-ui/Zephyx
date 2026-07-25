@@ -350,7 +350,7 @@ enum RuleCommands {
 #[tokio::main]
 async fn main() -> Result<()> {
     tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env().add_directive(tracing::Level::INFO.into()))
+        .with_env_filter(EnvFilter::from_default_env().add_directive(tracing::Level::WARN.into()))
         .init();
 
     let cli = Cli::parse();
@@ -758,7 +758,7 @@ async fn main() -> Result<()> {
         }
         Commands::Dashboard { name, ip } => println!("Launching Zephyx TUI for target {} ({})", name, ip),
         Commands::Doctor => {
-            println!("Running Zephyx System Doctor (v0.5.0):");
+            println!("Running Zephyx System Doctor (v{}):", env!("CARGO_PKG_VERSION"));
             for line in tool_service.doctor_report() {
                 println!("  {}", line);
             }
