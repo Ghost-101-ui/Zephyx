@@ -27,7 +27,7 @@ mod updater;
 
 #[derive(Parser)]
 #[command(name = "zpx")]
-#[command(author, version = "0.6.2", about = "Zephyx — Extensible Cybersecurity Operating Platform (v0.6)", long_about = None)]
+#[command(author, version = "0.6.3", about = "Zephyx — Extensible Cybersecurity Operating Platform (v0.6)", long_about = None)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,

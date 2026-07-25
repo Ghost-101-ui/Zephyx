@@ -309,22 +309,43 @@ fn extract_binary(archive_path: &std::path::Path, dest_dir: &std::path::Path) ->
 }
 
 /// Replace the current running binary with a new one.
-/// - Linux/macOS: direct copy (requires write permission)
+/// - Linux/macOS: tries direct copy; falls back to user-local install if permission denied
 /// - Windows: rename-then-copy (can't replace while running)
 fn replace_binary(new_binary: &std::path::Path, current_exe: &std::path::Path) -> Result<()> {
     println!("  → Installing new binary...");
 
     #[cfg(unix)]
     {
-        // Set executable bit on the new binary
         use std::os::unix::fs::PermissionsExt;
         let mut perms = fs::metadata(new_binary)?.permissions();
         perms.set_mode(0o755);
         fs::set_permissions(new_binary, perms)?;
 
-        // Copy to final location (preserves permissions across filesystems)
-        fs::copy(new_binary, current_exe)
-            .with_context(|| format!("Failed to replace binary at {}", current_exe.display()))?;
+        // Try to copy to the current exe location first
+        match fs::copy(new_binary, current_exe) {
+            Ok(_) => {}
+            Err(e) if e.kind() == std::io::ErrorKind::PermissionDenied => {
+                // Fall back: install to ~/.local/bin (user-writable, usually on PATH)
+                let fallback = fallback_user_bin()?;
+                std::fs::create_dir_all(&fallback)?;
+                let dest = fallback.join("zpx");
+                fs::copy(new_binary, &dest)
+                    .with_context(|| format!("Failed to install to user path {}", dest.display()))?;
+                let mut perms2 = fs::metadata(&dest)?.permissions();
+                perms2.set_mode(0o755);
+                fs::set_permissions(&dest, perms2)?;
+                println!("  ⚠  No write permission to {}.", current_exe.display());
+                println!("     Installed to {} instead.", dest.display());
+                println!("     Ensure {} is in your $PATH.", fallback.display());
+                println!("     To install system-wide, run:  sudo zpx update --self");
+                return Ok(());
+            }
+            Err(e) => {
+                return Err(e).with_context(|| {
+                    format!("Failed to replace binary at {}", current_exe.display())
+                });
+            }
+        }
     }
 
     #[cfg(windows)]
@@ -341,6 +362,16 @@ fn replace_binary(new_binary: &std::path::Path, current_exe: &std::path::Path) -
     }
 
     Ok(())
+}
+
+/// Returns a user-writable bin directory, preferring ~/.local/bin then ~/.cargo/bin.
+#[cfg(unix)]
+fn fallback_user_bin() -> Result<PathBuf> {
+    if let Some(home) = std::env::var_os("HOME") {
+        let local_bin = PathBuf::from(home).join(".local/bin");
+        return Ok(local_bin);
+    }
+    bail!("Could not determine home directory for user-local fallback install");
 }
 
 /// Compute the SHA256 hex digest of a file.
