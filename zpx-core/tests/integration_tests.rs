@@ -73,6 +73,6 @@ fn test_snapshot_creation() {
 #[test]
 fn test_automation_pipeline_default() {
     let pipe = AutomationPipeline::default_recon_pipeline();
-    assert_eq!(pipe.steps.len(), 2);
+    assert_eq!(pipe.steps.len(), 5);
     assert_eq!(pipe.steps[0].plugin, "nmap");
 }

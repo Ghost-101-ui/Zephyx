@@ -5,6 +5,8 @@ use zpx_core::api::ApiServer;
 use zpx_core::capability::{Capability, CapabilityRegistry};
 use zpx_core::config::ProfileManager;
 use zpx_core::db::DatabaseManager;
+use zpx_core::events::EventBus;
+use zpx_core::execution::ExecutionEngine;
 use zpx_core::export::{ExportEngine, ExportFormat};
 use zpx_core::marketplace::MarketplaceRegistry;
 use zpx_core::pipeline::AutomationPipeline;
@@ -373,14 +375,30 @@ async fn main() -> Result<()> {
             }
             let pipe = AutomationPipeline::default_recon_pipeline();
             println!("Executing default pipeline: {} ({} steps)", pipe.name, pipe.steps.len());
+            let event_bus = EventBus::global();
+            let exec_engine = ExecutionEngine::new(db.clone(), event_bus);
+
             for (idx, step) in pipe.steps.iter().enumerate() {
                 println!("  Step {}/{}: {} [{}] (Timeout: {}s)", idx + 1, pipe.steps.len(), step.name, step.plugin, step.timeout_seconds);
                 let args = step.profile.get_arguments(&step.plugin);
-                println!("    -> Profile: {:?} | Expected Args: {}", step.profile, args.join(" "));
-                println!("    -> Expected Output: {}", step.expected_outputs.join(", "));
-                println!("    -> Status: [COMPLETED] Step executed cleanly against target {}", ip);
+                println!("    -> Profile: {:?} | Launching command: {} {}", step.profile, step.plugin, args.join(" "));
+                
+                // Add target IP as final argument if tool is nmap or similar
+                let mut cmd_args = args.clone();
+                if !cmd_args.contains(&ip) {
+                    cmd_args.push(ip.clone());
+                }
+
+                match exec_engine.run_task(step.plugin.clone(), ip.clone(), step.plugin.clone(), cmd_args).await {
+                    Ok(task) => {
+                        println!("    -> Status: [{:?}] Task ID: {} (Elapsed: {}s)", task.state, task.id, task.elapsed_seconds);
+                    }
+                    Err(e) => {
+                        println!("    -> Status: [FAILED] {}", e);
+                    }
+                }
             }
-            println!("Pipeline execution finished cleanly. Session state recorded.");
+            println!("Pipeline execution finished. Target session recorded.");
         }
         Commands::Session { session_cmd } => match session_cmd {
             SessionCommands::Create { name, target } => {

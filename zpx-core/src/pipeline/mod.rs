@@ -17,12 +17,17 @@ impl ExecutionProfile {
             ("nmap", ExecutionProfile::Stealth) => vec!["-sS".into(), "-T2".into(), "-Pn".into(), "-n".into()],
             ("nmap", ExecutionProfile::Aggressive) => vec!["-A".into(), "-T4".into(), "-p-".into()],
             ("nmap", ExecutionProfile::Deep) => vec!["-sCV".into(), "-p-".into(), "--script=vuln".into()],
+            ("nmap", ExecutionProfile::Balanced) => vec!["-sV".into(), "-sC".into(), "-T4".into()],
             ("ffuf", ExecutionProfile::Fast) => vec!["-t".into(), "100".into(), "-mc".into(), "200,204,301,302,307".into()],
             ("ffuf", ExecutionProfile::Stealth) => vec!["-t".into(), "5".into(), "-p".into(), "0.2".into()],
             ("ffuf", ExecutionProfile::Aggressive) => vec!["-t".into(), "200".into(), "-recursion".into()],
+            ("ffuf", ExecutionProfile::Balanced) => vec!["-w".into(), "/usr/share/wordlists/dirb/common.txt".into(), "-mc".into(), "200,301,302".into()],
             ("gobuster", ExecutionProfile::Fast) => vec!["dir".into(), "-t".into(), "50".into()],
             ("gobuster", ExecutionProfile::Stealth) => vec!["dir".into(), "-t".into(), "5".into(), "--delay".into(), "500ms".into()],
-            _ => vec!["-sCV".into()],
+            ("whatweb", _) => vec!["-a".into(), "3".into(), "--color=never".into()],
+            ("nikto", _) => vec!["-Format".into(), "htm".into()],
+            ("linpeas", _) => vec!["-a".into(), "-s".into()],
+            _ => vec!["-h".into()],
         }
     }
 }
@@ -57,7 +62,7 @@ impl AutomationPipeline {
         Self {
             id: "default-recon".into(),
             name: "Default Network & Web Recon Pipeline".into(),
-            description: "Initial port scan followed by web directory discovery.".into(),
+            description: "Full assessment pipeline: Port scan, technology detection, directory discovery, vuln scan, and privesc check.".into(),
             variables: vec![("TARGET_IP".into(), "127.0.0.1".into())],
             steps: vec![
                 PipelineStep {
@@ -71,6 +76,16 @@ impl AutomationPipeline {
                     rollback_command: None,
                 },
                 PipelineStep {
+                    name: "Service & Technology Fingerprinting".into(),
+                    plugin: "whatweb".into(),
+                    profile: ExecutionProfile::Fast,
+                    timeout_seconds: 180,
+                    retry_count: 1,
+                    conditions: vec!["http_service_detected".into()],
+                    expected_outputs: vec!["whatweb.json".into()],
+                    rollback_command: None,
+                },
+                PipelineStep {
                     name: "Web Directory Discovery".into(),
                     plugin: "ffuf".into(),
                     profile: ExecutionProfile::Balanced,
@@ -78,6 +93,26 @@ impl AutomationPipeline {
                     retry_count: 0,
                     conditions: vec!["port_80_or_443_open".into()],
                     expected_outputs: vec!["web_directories.json".into()],
+                    rollback_command: None,
+                },
+                PipelineStep {
+                    name: "Vulnerability Scanning".into(),
+                    plugin: "nikto".into(),
+                    profile: ExecutionProfile::Balanced,
+                    timeout_seconds: 450,
+                    retry_count: 0,
+                    conditions: vec!["web_server_exposed".into()],
+                    expected_outputs: vec!["nikto_report.json".into()],
+                    rollback_command: None,
+                },
+                PipelineStep {
+                    name: "Privilege Escalation & Post-Exploit Audit".into(),
+                    plugin: "linpeas".into(),
+                    profile: ExecutionProfile::Deep,
+                    timeout_seconds: 600,
+                    retry_count: 0,
+                    conditions: vec!["shell_session_established".into()],
+                    expected_outputs: vec!["linpeas_output.txt".into()],
                     rollback_command: None,
                 },
             ],

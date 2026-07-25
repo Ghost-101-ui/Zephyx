@@ -265,6 +265,18 @@ sequenceDiagram
 
 ## 📦 Installation
 
+### Direct One-Liner Install (Recommended)
+
+**Linux / macOS:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/Ghost-101-ui/Zephyx/main/scripts/install.sh | sh
+```
+
+**Windows (PowerShell):**
+```powershell
+irm https://raw.githubusercontent.com/Ghost-101-ui/Zephyx/main/scripts/install.ps1 | iex
+```
+
 ### Prerequisites
 
 - **Rust** 1.75+ (for building from source)
