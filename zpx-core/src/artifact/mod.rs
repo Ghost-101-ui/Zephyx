@@ -5,6 +5,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use uuid::Uuid;
 
+use sha2::{Digest, Sha256};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ManagedArtifact {
     pub id: String,
@@ -23,7 +24,7 @@ pub struct ArtifactStore;
 
 impl ArtifactStore {
     pub fn calculate_checksum(bytes: &[u8]) -> String {
-        format!("{:x}", bytes.iter().fold(0u64, |acc, &b| acc.wrapping_add(b as u64 * 31)))
+        format!("{:x}", Sha256::digest(bytes))
     }
 
     pub fn create_artifact(
@@ -38,6 +39,7 @@ impl ArtifactStore {
         let file_name = format!("{}_{}", id, name);
         let target_path = dest_dir.as_ref().join(&file_name);
 
+        fs::create_dir_all(dest_dir.as_ref())?;
         fs::write(&target_path, content)?;
 
         let checksum_sha256 = Self::calculate_checksum(content);

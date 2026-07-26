@@ -356,8 +356,8 @@ async fn main() -> Result<()> {
         .init();
 
     let cli = Cli::parse();
-    let db = DatabaseManager::in_memory()?;
     let central_ws = CentralWorkspaceManager::init()?;
+    let db = DatabaseManager::new(central_ws.get_database_path())?;
     let tool_service = ToolService::new()?;
     let tool_manager = ToolManager::new()?;
     let session_manager = SessionManager::new()?;
