@@ -33,6 +33,7 @@ pub mod replay;
 pub mod repository;
 pub mod resource;
 pub mod rules;
+pub mod runtime;
 pub mod scheduler;
 pub mod sdk;
 pub mod service;

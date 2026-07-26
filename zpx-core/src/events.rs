@@ -42,6 +42,28 @@ pub enum SystemEvent {
     StrategyChanged { strategy_id: String, vector: String, probability: f32 },
     ReasoningGenerated { trace_id: String, justification: String },
     TimelineUpdated { record_id: String },
+
+    // v0.6.5 Autonomous Reasoning Runtime Events
+    ToolStarted { tool_name: String, command: String },
+    ToolCompleted { tool_name: String, exit_code: i32 },
+    ToolFailed { tool_name: String, error: String },
+    ParserCompleted { plugin_name: String, findings_count: usize },
+    FindingUpdated { finding_id: String },
+    ContextUpdated { target_ip: String },
+    KnowledgeGraphUpdated { nodes_count: usize, edges_count: usize },
+    ObjectiveFailed { objective_id: String, reason: String },
+    StrategyUpdated { strategy_id: String, status: String },
+    DecisionRequired { reason: String },
+    CapabilityRequested { capability: String },
+    CapabilityFailed { capability: String, reason: String },
+    CapabilityCompleted { capability: String },
+    ToolResolved { capability: String, tool: String },
+    ExecutionPaused { reason: String },
+    ExecutionResumed,
+    UserDecisionRequested { prompt: String },
+    UserDecisionReceived { choice: String },
+    RuntimeIdle,
+    RuntimeCompleted,
 }
 
 #[derive(Clone)]

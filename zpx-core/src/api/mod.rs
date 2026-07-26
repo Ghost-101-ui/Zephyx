@@ -44,6 +44,13 @@ impl ApiServer {
                                 "/api/v1/reasoning",
                                 "/api/v1/timeline",
                                 "/api/v1/browser",
+                                "/api/v1/runtime",
+                                "/api/v1/runtime/status",
+                                "/api/v1/runtime/context",
+                                "/api/v1/runtime/objectives",
+                                "/api/v1/runtime/hypotheses",
+                                "/api/v1/runtime/strategies",
+                                "/api/v1/runtime/reasoning",
                                 "/api/v1/statistics"
                             ]
                         }).to_string();

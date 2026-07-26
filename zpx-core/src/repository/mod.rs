@@ -17,6 +17,10 @@ impl RepositoryManager {
     pub fn db(&self) -> &DatabaseManager {
         &self.db
     }
+
+    pub fn findings(&self) -> FindingRepository {
+        FindingRepository::new(self.db.clone())
+    }
 }
 
 #[derive(Clone)]

@@ -72,3 +72,14 @@ impl CapabilityRegistry {
         ))
     }
 }
+
+pub struct CapabilityResolver;
+
+impl CapabilityResolver {
+    pub fn select_best_tool(
+        tool_manager: &ToolManager,
+        capability: &Capability,
+    ) -> Result<(String, String)> {
+        CapabilityRegistry::resolve_tool_for_capability(tool_manager, capability)
+    }
+}
