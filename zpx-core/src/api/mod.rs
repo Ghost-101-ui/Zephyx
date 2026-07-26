@@ -38,6 +38,12 @@ impl ApiServer {
                                 "/api/v1/plugins",
                                 "/api/v1/reports",
                                 "/api/v1/snapshots",
+                                "/api/v1/objectives",
+                                "/api/v1/hypotheses",
+                                "/api/v1/strategies",
+                                "/api/v1/reasoning",
+                                "/api/v1/timeline",
+                                "/api/v1/browser",
                                 "/api/v1/statistics"
                             ]
                         }).to_string();

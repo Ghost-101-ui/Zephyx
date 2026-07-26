@@ -34,6 +34,11 @@ pub struct App {
     pub attack_edges: Vec<AttackEdge>,
     pub active_pipeline: AutomationPipeline,
     pub logs: Vec<LogEntry>,
+    pub objectives: Vec<zpx_core::engine::Objective>,
+    pub hypotheses: Vec<zpx_core::engine::Hypothesis>,
+    pub strategies: Vec<zpx_core::engine::Strategy>,
+    pub reasoning_traces: Vec<zpx_core::engine::ReasoningTrace>,
+    pub browser_intel: zpx_core::browser::BrowserIntelligence,
     pub cpu_usage: f32,
     pub memory_usage: u64,
     pub palette_open: bool,
@@ -192,6 +197,11 @@ impl App {
                     message: "Workflow phase transitioned to Enumeration".into(),
                 },
             ],
+            objectives: zpx_core::engine::ObjectiveEngine::get_default_tree(),
+            hypotheses: Vec::new(),
+            strategies: Vec::new(),
+            reasoning_traces: Vec::new(),
+            browser_intel: zpx_core::browser::BrowserIntelligence::new(),
             cpu_usage: 12.5,
             memory_usage: sys.used_memory() / 1024 / 1024,
             palette_open: false,
@@ -220,7 +230,7 @@ impl App {
         sys.refresh_memory();
 
         let target = db.get_target(&target_ip).ok().flatten().unwrap_or_else(|| TargetInfo {
-            name: target_name,
+            name: target_name.clone(),
             ip: target_ip.clone(),
             hostname: None,
             os: None,
@@ -235,6 +245,11 @@ impl App {
         let attack_nodes = db.get_attack_nodes().unwrap_or_default();
         let attack_edges = db.get_attack_edges().unwrap_or_default();
 
+        let target_ctx = zpx_core::context::TargetContext::new(&target_ip, &target_name);
+        let hypotheses = zpx_core::engine::HypothesisEngine::evaluate(&target_ctx).unwrap_or_default();
+        let strategies = zpx_core::engine::StrategyPlanner::evaluate(&target_ctx).unwrap_or_default();
+        let objectives = zpx_core::engine::ObjectiveEngine::get_default_tree();
+
         Self {
             active_tab: ActiveTab::Dashboard,
             target,
@@ -248,6 +263,11 @@ impl App {
             attack_edges,
             active_pipeline: AutomationPipeline::default_recon_pipeline(),
             logs: Vec::new(),
+            objectives,
+            hypotheses,
+            strategies,
+            reasoning_traces: Vec::new(),
+            browser_intel: zpx_core::browser::BrowserIntelligence::new(),
             cpu_usage: sys.global_cpu_info().cpu_usage(),
             memory_usage: sys.used_memory() / 1024 / 1024,
             palette_open: false,

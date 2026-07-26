@@ -31,6 +31,17 @@ pub enum SystemEvent {
     SessionEnded { session_id: String },
     ArtifactCreated { artifact_id: String, name: String, path: String },
     ResourceAlert { message: String },
+
+    // v0.6.4 Cognitive Reasoning Events
+    ObjectiveActivated { objective_id: String, name: String },
+    ObjectiveCompleted { objective_id: String, name: String },
+    HypothesisCreated { hypothesis_id: String, description: String, confidence: f32 },
+    HypothesisUpdated { hypothesis_id: String, status: String, confidence: f32 },
+    DecisionMade { decision_id: String, capability: String, tool: String },
+    CapabilitySelected { capability: String, tool: String },
+    StrategyChanged { strategy_id: String, vector: String, probability: f32 },
+    ReasoningGenerated { trace_id: String, justification: String },
+    TimelineUpdated { record_id: String },
 }
 
 #[derive(Clone)]

@@ -1,6 +1,7 @@
 pub mod ai;
 pub mod api;
 pub mod artifact;
+pub mod browser;
 pub mod capability;
 pub mod config;
 pub mod context;
@@ -38,6 +39,7 @@ pub mod service;
 pub mod session;
 pub mod snapshot;
 pub mod stats;
+pub mod timeline;
 pub mod tool_manager;
 pub mod workflow;
 pub mod workspace;
