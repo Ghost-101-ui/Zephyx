@@ -200,7 +200,11 @@ fn render_decision_view(f: &mut Frame, app: &App, area: Rect) {
         lines.push(Line::from(""));
     }
 
-    let p = Paragraph::new(lines).block(Block::default().borders(Borders::ALL).title(" Deterministic Decision Chains "));
+    let p = Paragraph::new(lines).block(
+        Block::default()
+            .borders(Borders::ALL)
+            .title(" Deterministic Decision Chains "),
+    );
     f.render_widget(p, area);
 }
 
@@ -209,16 +213,28 @@ fn render_knowledge_view(f: &mut Frame, _app: &App, area: Rect) {
     let mut lines = Vec::new();
 
     for article in kb {
-        lines.push(Line::from(Span::styled(format!("[{}] {}", article.category, article.title), Style::default().fg(Color::Green).add_modifier(Modifier::BOLD))));
+        lines.push(Line::from(Span::styled(
+            format!("[{}] {}", article.category, article.title),
+            Style::default()
+                .fg(Color::Green)
+                .add_modifier(Modifier::BOLD),
+        )));
         lines.push(Line::from(article.description));
-        lines.push(Line::from(Span::styled("Commands:", Style::default().fg(Color::Cyan))));
+        lines.push(Line::from(Span::styled(
+            "Commands:",
+            Style::default().fg(Color::Cyan),
+        )));
         for cmd in article.commands {
             lines.push(Line::from(format!("  $ {}", cmd)));
         }
         lines.push(Line::from(""));
     }
 
-    let p = Paragraph::new(lines).block(Block::default().borders(Borders::ALL).title(" Offline Security Playbooks "));
+    let p = Paragraph::new(lines).block(
+        Block::default()
+            .borders(Borders::ALL)
+            .title(" Offline Security Playbooks "),
+    );
     f.render_widget(p, area);
 }
 
@@ -251,8 +267,23 @@ fn render_tasks_view(f: &mut Frame, app: &App, area: Rect) {
             Constraint::Length(16),
         ],
     )
-    .header(Row::new(vec!["ID", "Plugin", "State", "Progress", "Operation", "Elapsed", "CPU / RAM"]).style(Style::default().fg(Color::Yellow)))
-    .block(Block::default().borders(Borders::ALL).title(" Background Task Scheduler & Execution Monitor "));
+    .header(
+        Row::new(vec![
+            "ID",
+            "Plugin",
+            "State",
+            "Progress",
+            "Operation",
+            "Elapsed",
+            "CPU / RAM",
+        ])
+        .style(Style::default().fg(Color::Yellow)),
+    )
+    .block(
+        Block::default()
+            .borders(Borders::ALL)
+            .title(" Background Task Scheduler & Execution Monitor "),
+    );
 
     f.render_widget(table, area);
 }
@@ -274,7 +305,11 @@ fn render_explorer_view(f: &mut Frame, app: &App, area: Rect) {
         ListItem::new(format!("🔌 Registered Plugins ({})", app.plugins.len())),
     ];
 
-    let tree = List::new(tree_items).block(Block::default().borders(Borders::ALL).title(" Workspace Explorer "));
+    let tree = List::new(tree_items).block(
+        Block::default()
+            .borders(Borders::ALL)
+            .title(" Workspace Explorer "),
+    );
     f.render_widget(tree, chunks[0]);
 
     let details_p = Paragraph::new(vec![
