@@ -69,13 +69,13 @@ jobs:
         run: cargo test --workspace --all-targets
 
   test-msrv:
-    name: "Tests · MSRV (Rust 1.75)"
+    name: "Tests · MSRV (Rust 1.85)"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Rust 1.78
-        uses: dtolnay/rust-toolchain@1.78
+      - name: Install Rust 1.85
+        uses: dtolnay/rust-toolchain@1.85
 
       - name: Cache Cargo
         uses: Swatinem/rust-cache@v2

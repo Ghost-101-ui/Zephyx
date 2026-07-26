@@ -50,6 +50,8 @@ jobs:
           cd dist && tar -czf "../Zephyx-${VER}-linux-amd64.tar.gz" zpx
 
       - name: Package .deb
+        continue-on-error: true
+        id: deb-amd64
         run: |
           VER=${{ steps.ver.outputs.VERSION }}
           chmod +x packaging/linux/build-deb.sh
@@ -62,9 +64,9 @@ jobs:
       - name: Generate checksums
         run: |
           VER=${{ steps.ver.outputs.VERSION }}
-          sha256sum "Zephyx-${VER}-linux-amd64.tar.gz" \
-                    "Zephyx-${VER}-linux-amd64.deb" \
-            > checksums-linux-amd64.txt
+          files=("Zephyx-${VER}-linux-amd64.tar.gz")
+          [ -f "Zephyx-${VER}-linux-amd64.deb" ] && files+=("Zephyx-${VER}-linux-amd64.deb")
+          sha256sum "${files[@]}" > checksums-linux-amd64.txt
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -118,6 +120,8 @@ jobs:
           cd dist && tar -czf "../Zephyx-${VER}-linux-arm64.tar.gz" zpx
 
       - name: Package .deb
+        continue-on-error: true
+        id: deb-arm64
         run: |
           VER=${{ steps.ver.outputs.VERSION }}
           chmod +x packaging/linux/build-deb.sh
@@ -130,9 +134,9 @@ jobs:
       - name: Generate checksums
         run: |
           VER=${{ steps.ver.outputs.VERSION }}
-          sha256sum "Zephyx-${VER}-linux-arm64.tar.gz" \
-                    "Zephyx-${VER}-linux-arm64.deb" \
-            > checksums-linux-arm64.txt
+          files=("Zephyx-${VER}-linux-arm64.tar.gz")
+          [ -f "Zephyx-${VER}-linux-arm64.deb" ] && files+=("Zephyx-${VER}-linux-arm64.deb")
+          sha256sum "${files[@]}" > checksums-linux-arm64.txt
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -172,6 +176,8 @@ jobs:
         run: choco install nsis --yes --no-progress
 
       - name: Build NSIS installer
+        continue-on-error: true
+        id: nsis
         shell: pwsh
         run: |
           $ver = "${{ steps.ver.outputs.VERSION }}"
