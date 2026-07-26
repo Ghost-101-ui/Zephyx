@@ -29,6 +29,7 @@ pub mod plugin;
 pub mod recommendation;
 pub mod report;
 pub mod replay;
+pub mod repository;
 pub mod resource;
 pub mod rules;
 pub mod scheduler;

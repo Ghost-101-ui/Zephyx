@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
 
-use crate::models::{Evidence, Finding, Phase};
+use crate::models::{Evidence, Finding, FindingKind, Phase};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TargetContext {
@@ -76,6 +76,35 @@ impl TargetContext {
             event_type: "credential_found".to_string(),
             summary: format!("Credential acquired for user {}", user),
         });
+    }
+
+    pub fn update_from_finding(&mut self, finding: &Finding) {
+        self.record_finding(finding.clone());
+        match &finding.kind {
+            FindingKind::Port { port, service, version, .. } => {
+                let service_str = if let Some(v) = version {
+                    format!("{} ({})", service, v)
+                } else {
+                    service.clone()
+                };
+                self.add_port_service(*port, &service_str);
+            }
+            FindingKind::HttpEndpoint { url, .. } => {
+                self.add_technology("HTTP Server");
+                self.metadata.insert("web_endpoint".into(), url.clone());
+            }
+            FindingKind::Credential { username, password_or_hash, .. } => {
+                self.add_credential(username, password_or_hash);
+            }
+            FindingKind::Flag { flag_type, value } => {
+                self.metadata.insert(format!("flag_{}", flag_type), value.clone());
+            }
+            FindingKind::SmbShare { share_name, .. } => {
+                self.add_technology("SMB / Windows Share");
+                self.metadata.insert(format!("share_{}", share_name), share_name.clone());
+            }
+            _ => {}
+        }
     }
 }
 

@@ -128,3 +128,26 @@ impl SessionManager {
         })
     }
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SessionContext {
+    pub session_id: String,
+    pub session_name: String,
+    pub target_ip: String,
+    pub active_workflow: Option<String>,
+    pub current_phase: crate::models::Phase,
+    pub active_profile: String,
+}
+
+impl SessionContext {
+    pub fn new(session: &Session, target_ip: &str) -> Self {
+        Self {
+            session_id: session.metadata.id.clone(),
+            session_name: session.metadata.name.clone(),
+            target_ip: target_ip.to_string(),
+            active_workflow: None,
+            current_phase: crate::models::Phase::Recon,
+            active_profile: session.metadata.active_profile.clone(),
+        }
+    }
+}

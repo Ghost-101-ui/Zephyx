@@ -15,7 +15,11 @@ pub struct DatabaseManager {
 
 impl DatabaseManager {
     pub fn new(db_path: impl AsRef<Path>) -> Result<Self> {
-        let conn = Connection::open(db_path).context("Failed to open SQLite database")?;
+        let path = db_path.as_ref();
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent).context("Failed to create database directory structure")?;
+        }
+        let conn = Connection::open(path).context("Failed to open SQLite database")?;
         let db = Self {
             conn: Arc::new(Mutex::new(conn)),
         };
@@ -196,6 +200,50 @@ impl DatabaseManager {
         Ok(())
     }
 
+    pub fn get_target(&self, ip: &str) -> Result<Option<TargetInfo>> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare("SELECT name, ip, hostname, os, phase, created_at FROM targets WHERE ip = ?1")?;
+        let mut rows = stmt.query_map(params![ip], |row| {
+            let name: String = row.get(0)?;
+            let ip: String = row.get(1)?;
+            let hostname: Option<String> = row.get(2)?;
+            let os: Option<String> = row.get(3)?;
+            let phase_str: String = row.get(4)?;
+            let created_str: String = row.get(5)?;
+
+            let phase = match phase_str.as_str() {
+                "Reconnaissance" => crate::models::Phase::Recon,
+                "Enumeration" => crate::models::Phase::Enumeration,
+                "Technology Detection" => crate::models::Phase::TechnologyDetection,
+                "Vulnerability Discovery" => crate::models::Phase::VulnerabilityDiscovery,
+                "Exploitation" => crate::models::Phase::Exploitation,
+                "Privilege Escalation" => crate::models::Phase::PrivilegeEscalation,
+                "Post Exploitation" => crate::models::Phase::PostExploitation,
+                "Flag Collection" => crate::models::Phase::FlagCollection,
+                _ => crate::models::Phase::Reporting,
+            };
+
+            let created_at = chrono::DateTime::parse_from_rfc3339(&created_str)
+                .map(|dt| dt.with_timezone(&chrono::Utc))
+                .unwrap_or_else(|_| chrono::Utc::now());
+
+            Ok(TargetInfo {
+                name,
+                ip,
+                hostname,
+                os,
+                phase,
+                created_at,
+            })
+        })?;
+
+        if let Some(target) = rows.next() {
+            Ok(Some(target?))
+        } else {
+            Ok(None)
+        }
+    }
+
     pub fn insert_finding(&self, finding: &Finding) -> Result<()> {
         let conn = self.conn.lock().unwrap();
         let kind_json = serde_json::to_string(&finding.kind)?;
@@ -289,6 +337,40 @@ impl DatabaseManager {
         Ok(())
     }
 
+    pub fn get_evidence(&self) -> Result<Vec<Evidence>> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare("SELECT id, finding_id, tool_name, raw_output_path, checksum_sha256, mime_type, timestamp FROM evidence")?;
+        let rows = stmt.query_map([], |row| {
+            let id: String = row.get(0)?;
+            let finding_id: String = row.get(1)?;
+            let tool_name: String = row.get(2)?;
+            let raw_output_path: String = row.get(3)?;
+            let checksum_sha256: String = row.get(4)?;
+            let mime_type: String = row.get(5)?;
+            let timestamp_str: String = row.get(6)?;
+
+            let timestamp = chrono::DateTime::parse_from_rfc3339(&timestamp_str)
+                .map(|dt| dt.with_timezone(&chrono::Utc))
+                .unwrap_or_else(|_| chrono::Utc::now());
+
+            Ok(Evidence {
+                id,
+                finding_id,
+                tool_name,
+                raw_output_path,
+                checksum_sha256,
+                mime_type,
+                timestamp,
+            })
+        })?;
+
+        let mut list = Vec::new();
+        for item in rows {
+            list.push(item?);
+        }
+        Ok(list)
+    }
+
     pub fn save_task(&self, task: &Task) -> Result<()> {
         let conn = self.conn.lock().unwrap();
         let started_at_str = task.started_at.map(|dt| dt.to_rfc3339());
@@ -334,6 +416,50 @@ impl DatabaseManager {
                 entry.user_action
             ],
         )?;
+        Ok(())
+    }
+
+    pub fn get_journal_entries(&self) -> Result<Vec<JournalEntry>> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare("SELECT id, timestamp, decision, reason, confidence, triggered_finding_ids_json, generated_command, user_action FROM decision_journal")?;
+        let rows = stmt.query_map([], |row| {
+            let id: String = row.get(0)?;
+            let timestamp_str: String = row.get(1)?;
+            let decision: String = row.get(2)?;
+            let reason: String = row.get(3)?;
+            let confidence: f32 = row.get(4)?;
+            let triggered_json: String = row.get(5)?;
+            let generated_command: String = row.get(6)?;
+            let user_action: String = row.get(7)?;
+
+            let triggered_finding_ids: Vec<String> = serde_json::from_str(&triggered_json).unwrap_or_default();
+            let timestamp = chrono::DateTime::parse_from_rfc3339(&timestamp_str)
+                .map(|dt| dt.with_timezone(&chrono::Utc))
+                .unwrap_or_else(|_| chrono::Utc::now());
+
+            Ok(JournalEntry {
+                id,
+                timestamp,
+                decision,
+                reason,
+                confidence,
+                triggered_finding_ids,
+                generated_command,
+                user_action,
+            })
+        })?;
+
+        let mut list = Vec::new();
+        for item in rows {
+            list.push(item?);
+        }
+        Ok(list)
+    }
+
+    pub fn save_recommendations(&self, recs: &[Recommendation]) -> Result<()> {
+        for r in recs {
+            self.insert_recommendation(r)?;
+        }
         Ok(())
     }
 

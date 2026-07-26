@@ -213,4 +213,46 @@ impl App {
             self.palette_input.clear();
         }
     }
+
+    pub fn from_database(db: &zpx_core::db::DatabaseManager, target_name: String, target_ip: String) -> Self {
+        let mut sys = System::new_all();
+        sys.refresh_cpu();
+        sys.refresh_memory();
+
+        let target = db.get_target(&target_ip).ok().flatten().unwrap_or_else(|| TargetInfo {
+            name: target_name,
+            ip: target_ip.clone(),
+            hostname: None,
+            os: None,
+            phase: Phase::Recon,
+            created_at: chrono::Utc::now(),
+        });
+
+        let findings = db.get_findings().unwrap_or_default();
+        let recommendations = db.get_recommendations().unwrap_or_default();
+        let tasks = db.get_tasks().unwrap_or_default();
+        let journal_entries = db.get_journal_entries().unwrap_or_default();
+        let attack_nodes = db.get_attack_nodes().unwrap_or_default();
+        let attack_edges = db.get_attack_edges().unwrap_or_default();
+
+        Self {
+            active_tab: ActiveTab::Dashboard,
+            target,
+            findings,
+            recommendations,
+            journal_entries,
+            tasks,
+            plugins: PluginManifest::get_builtins(),
+            workflow_templates: WorkflowTemplate::get_builtins(),
+            attack_nodes,
+            attack_edges,
+            active_pipeline: AutomationPipeline::default_recon_pipeline(),
+            logs: Vec::new(),
+            cpu_usage: sys.global_cpu_info().cpu_usage(),
+            memory_usage: sys.used_memory() / 1024 / 1024,
+            palette_open: false,
+            palette_input: String::new(),
+            system_monitor: sys,
+        }
+    }
 }
