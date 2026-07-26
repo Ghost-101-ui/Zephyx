@@ -59,7 +59,9 @@ where
                         _ => {}
                     }
                 } else {
-                    if key.modifiers.contains(KeyModifiers::CONTROL) && key.code == KeyCode::Char('p') {
+                    if key.modifiers.contains(KeyModifiers::CONTROL)
+                        && key.code == KeyCode::Char('p')
+                    {
                         app.toggle_palette();
                         continue;
                     }

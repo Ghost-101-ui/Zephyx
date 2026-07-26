@@ -321,16 +321,29 @@ fn render_pipeline_view(f: &mut Frame, app: &App, area: Rect) {
 
     lines.push(Line::from(Span::styled("Pipeline Step Sequence:", Style::default().fg(Color::Yellow))));
     for (idx, step) in app.active_pipeline.steps.iter().enumerate() {
-        lines.push(Line::from(format!(" Step {}: {} (Plugin: {}, Profile: {:?}, Timeout: {}s)", idx + 1, step.name, step.plugin, step.profile, step.timeout_seconds)));
+        lines.push(Line::from(format!(
+            " Step {}: {} (Plugin: {}, Profile: {:?}, Timeout: {}s)",
+            idx + 1,
+            step.name,
+            step.plugin,
+            step.profile,
+            step.timeout_seconds
+        )));
     }
 
-    let p = Paragraph::new(lines).block(Block::default().borders(Borders::ALL).title(" Automation Pipeline Runner "));
+    let p = Paragraph::new(lines).block(
+        Block::default()
+            .borders(Borders::ALL)
+            .title(" Automation Pipeline Runner "),
+    );
     f.render_widget(p, area);
 }
 
 fn render_status_bar(f: &mut Frame, _app: &App, area: Rect) {
-    let bar = Paragraph::new(" [1-9] Tabs | [Ctrl+P] Command Palette | [q] Quit | Zephyx Workflow Engine Active")
-        .style(Style::default().bg(Color::Blue).fg(Color::White));
+    let bar = Paragraph::new(
+        " [1-9] Tabs | [Ctrl+P] Command Palette | [q] Quit | Zephyx Workflow Engine Active",
+    )
+    .style(Style::default().bg(Color::Blue).fg(Color::White));
     f.render_widget(bar, area);
 }
 
@@ -347,11 +360,21 @@ fn render_palette_overlay(f: &mut Frame, app: &App, area: Rect) {
     let popup = Paragraph::new(vec![
         Line::from("Type a command or workflow name..."),
         Line::from(""),
-        Line::from(Span::styled(format!("> {}_", app.palette_input), Style::default().fg(Color::Yellow))),
+        Line::from(Span::styled(
+            format!("> {}_", app.palette_input),
+            Style::default().fg(Color::Yellow),
+        )),
         Line::from(""),
-        Line::from(Span::styled("Press [Esc] to dismiss", Style::default().fg(Color::DarkGray))),
+        Line::from(Span::styled(
+            "Press [Esc] to dismiss",
+            Style::default().fg(Color::DarkGray),
+        )),
     ])
-    .block(Block::default().borders(Borders::ALL).title(" Command Palette (Ctrl+P) "));
+    .block(
+        Block::default()
+            .borders(Borders::ALL)
+            .title(" Command Palette (Ctrl+P) "),
+    );
 
     f.render_widget(popup, popup_area);
 }

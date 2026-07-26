@@ -12,7 +12,27 @@ See [INSTALL.md](../INSTALL.md) for the complete installation guide.
 
 ---
 
-## Minimal Quick Install
+## One-Liner Quick Install / Reinstall / Uninstall
+
+### Linux & macOS
+```bash
+# Install / Reinstall
+curl -fsSL https://raw.githubusercontent.com/Ghost-101-ui/Zephyx/main/scripts/install.sh | sh
+
+# Uninstall / Remove
+curl -fsSL https://raw.githubusercontent.com/Ghost-101-ui/Zephyx/main/scripts/uninstall.sh | sh
+```
+
+### Windows (PowerShell)
+```powershell
+# Install / Reinstall
+irm https://raw.githubusercontent.com/Ghost-101-ui/Zephyx/main/scripts/install.ps1 | iex
+
+# Uninstall / Remove
+irm https://raw.githubusercontent.com/Ghost-101-ui/Zephyx/main/scripts/uninstall.ps1 | iex
+```
+
+## Minimal Quick Build from Source
 
 ```bash
 # Install Rust

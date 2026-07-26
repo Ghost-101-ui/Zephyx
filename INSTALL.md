@@ -4,6 +4,26 @@ This document covers all installation methods for every supported platform.
 
 For platform support details, see [SUPPORTED_PLATFORMS.md](SUPPORTED_PLATFORMS.md).
 
+## Quick Install / Reinstall / Uninstall One-Liners
+
+### Linux & macOS
+```bash
+# Install or Reinstall
+curl -fsSL https://raw.githubusercontent.com/Ghost-101-ui/Zephyx/main/scripts/install.sh | sh
+
+# Uninstall / Remove
+curl -fsSL https://raw.githubusercontent.com/Ghost-101-ui/Zephyx/main/scripts/uninstall.sh | sh
+```
+
+### Windows (PowerShell)
+```powershell
+# Install or Reinstall
+irm https://raw.githubusercontent.com/Ghost-101-ui/Zephyx/main/scripts/install.ps1 | iex
+
+# Uninstall / Remove
+irm https://raw.githubusercontent.com/Ghost-101-ui/Zephyx/main/scripts/uninstall.ps1 | iex
+```
+
 ---
 
 ## Prerequisites

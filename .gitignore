@@ -1,5 +1,6 @@
 # Rust build artifacts
 /target/
+/dist-linux/
 
 # Cargo lock (keep for binaries, remove for libraries — we keep it for workspace)
 # Cargo.lock
