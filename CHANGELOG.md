@@ -4,6 +4,26 @@ All notable changes to Zephyx are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.5] — Autonomous Reasoning Runtime
+
+### Added
+- **`RuntimeCoordinator`** — Event-driven central reasoning loop connecting Observe -> Parse -> Persist -> Sync Context -> Update Graph -> Refine Hypotheses -> Evaluate Objectives -> Recalculate Strategies -> Select Capability -> Resolve Tool -> Execute -> Learn.
+- **Runtime System Events** — Added full event set (`ToolStarted`, `ToolCompleted`, `ToolFailed`, `ParserCompleted`, `FindingUpdated`, `ContextUpdated`, `HypothesisUpdated`, `ObjectiveCompleted`, `StrategyUpdated`, `CapabilitySelected`, `RuntimeIdle`, `RuntimeCompleted`).
+- **Capability Resolver** — Added `CapabilityResolver` to map decision engine requests to installed system tools.
+- **Runtime REST API Endpoints** — `/api/v1/runtime`, `/api/v1/runtime/status`, `/api/v1/runtime/context`, `/api/v1/runtime/objectives`, `/api/v1/runtime/hypotheses`, `/api/v1/runtime/strategies`, `/api/v1/runtime/reasoning`.
+
+---
+
+## [0.6.4] — Cognitive Decision & Adaptive Reasoning Engine
+
+### Added
+- **Objective Engine** — Mission-driven objectives (Recon, Enumeration, Tech ID, Initial Access, PrivEsc, Flag Discovery) with automatic state progression.
+- **Hypothesis Engine** — Probabilistic hypothesis evaluation over observed indicators (e.g. HTTP + PHP + robots.txt -> WordPress hypothesis @ 72% confidence -> WhatWeb tag -> Confirmed @ 99%).
+- **Strategy Planner** — Competing attack vectors (Web, SMB, SSH, Network) ranked by probability, missing info, and cost.
+- **Reasoning Trace Engine** — Full decision explainability with stored `ReasoningTrace` records.
+- **Browser Intelligence Framework** — `BrowserIntelligence` for web app DOM, form, file upload, SPA framework, and API endpoint inspection.
+- **Timeline & Collaboration Mode** — `TimelineRecord` and `CollaborationMode` for Interactive, Assisted, Explainable human decision making.
+
 ---
 
 ## [0.6.0] — Intelligence Layer

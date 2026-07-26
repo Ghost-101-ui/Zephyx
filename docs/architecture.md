@@ -27,6 +27,12 @@ graph TB
     API["REST API Server"]
 
     subgraph Core ["zpx-core — Platform Core"]
+        RC["RuntimeCoordinator (Autonomous Runtime Loop)"]
+        OE["Objective Engine"]
+        HE["Hypothesis Engine"]
+        SP["Strategy Planner"]
+        RT["Reasoning Trace Engine"]
+        BI["Browser Intelligence"]
         WF["Workflow Engine"]
         DE["Decision Engine"]
         TM["Tool Manager"]
