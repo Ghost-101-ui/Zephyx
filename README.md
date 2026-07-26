@@ -358,20 +358,20 @@ zpx update --check
 ### Apply the update
 ```bash
 # Linux / macOS — user-local install (no sudo required)
-zpx update --self
+zpx update --self-update
 
 # Linux / macOS — system-wide install
-sudo zpx update --self
+sudo zpx update --self-update
 
 # Windows (PowerShell — run as Administrator for system PATH)
-zpx update --self
+zpx update --self-update
 ```
 
 > **Note (Linux/macOS):** If `zpx` is installed in a system directory (e.g. `/usr/local/bin`), running without `sudo` will **automatically fall back** to installing in `~/.local/bin` instead of failing. Make sure `~/.local/bin` is in your `$PATH`.
 
 ### Force re-install current version
 ```bash
-zpx update --self --force
+zpx update --self-update --force
 ```
 
 ### View build info
