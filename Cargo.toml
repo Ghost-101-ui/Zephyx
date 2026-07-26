@@ -31,7 +31,7 @@ crossterm = { version = "0.27", features = ["event-stream"] }
 anyhow = "1.0"
 thiserror = "1.0"
 sysinfo = "0.30"
-quick-xml = { version = "0.37", features = ["serialize"] }
+quick-xml = { version = "0.41", features = ["serialize"] }
 regex = "1.10"
 sha2 = "0.10"
 tempfile = "3.10"

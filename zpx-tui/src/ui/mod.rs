@@ -278,48 +278,89 @@ fn render_explorer_view(f: &mut Frame, app: &App, area: Rect) {
     f.render_widget(tree, chunks[0]);
 
     let details_p = Paragraph::new(vec![
-        Line::from(Span::styled("Target Workspace Inspector", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))),
+        Line::from(Span::styled(
+            "Target Workspace Inspector",
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
+        )),
         Line::from(""),
-        Line::from(format!("Active Target: {} ({})", app.target.name, app.target.ip)),
-        Line::from(format!("Target OS: {}", app.target.os.as_deref().unwrap_or("Unknown"))),
+        Line::from(format!(
+            "Active Target: {} ({})",
+            app.target.name, app.target.ip
+        )),
+        Line::from(format!(
+            "Target OS: {}",
+            app.target.os.as_deref().unwrap_or("Unknown")
+        )),
         Line::from(""),
-        Line::from(Span::styled("Workflow Templates Available:", Style::default().fg(Color::Yellow))),
+        Line::from(Span::styled(
+            "Workflow Templates Available:",
+            Style::default().fg(Color::Yellow),
+        )),
         Line::from("  • HTB Linux Machine Workflow"),
         Line::from("  • HTB Windows Machine Workflow"),
         Line::from("  • TryHackMe Web Application Workflow"),
         Line::from("  • Active Directory Domain Assessment"),
     ])
-    .block(Block::default().borders(Borders::ALL).title(" Workspace Details & Workflow Templates "));
+    .block(
+        Block::default()
+            .borders(Borders::ALL)
+            .title(" Workspace Details & Workflow Templates "),
+    );
 
     f.render_widget(details_p, chunks[1]);
 }
 
 fn render_attack_graph_view(f: &mut Frame, app: &App, area: Rect) {
     let mut lines = Vec::new();
-    lines.push(Line::from(Span::styled("Target Discovered Attack Graph", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))));
+    lines.push(Line::from(Span::styled(
+        "Target Discovered Attack Graph",
+        Style::default()
+            .fg(Color::Yellow)
+            .add_modifier(Modifier::BOLD),
+    )));
     lines.push(Line::from(""));
 
     for node in &app.attack_nodes {
-        lines.push(Line::from(format!(" 🟢 Node [{}] {}", node.node_type, node.label)));
+        lines.push(Line::from(format!(
+            " 🟢 Node [{}] {}",
+            node.node_type, node.label
+        )));
         for edge in &app.attack_edges {
             if edge.source_id == node.id {
-                lines.push(Line::from(format!("    ├──({:^18})──► Node {}", edge.relationship, edge.target_id)));
+                lines.push(Line::from(format!(
+                    "    ├──({:^18})──► Node {}",
+                    edge.relationship, edge.target_id
+                )));
             }
         }
         lines.push(Line::from(""));
     }
 
-    let p = Paragraph::new(lines).block(Block::default().borders(Borders::ALL).title(" Persistent Attack Graph Visualizer "));
+    let p = Paragraph::new(lines).block(
+        Block::default()
+            .borders(Borders::ALL)
+            .title(" Persistent Attack Graph Visualizer "),
+    );
     f.render_widget(p, area);
 }
 
 fn render_pipeline_view(f: &mut Frame, app: &App, area: Rect) {
     let mut lines = Vec::new();
-    lines.push(Line::from(Span::styled(format!("Active Pipeline: {}", app.active_pipeline.name), Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))));
+    lines.push(Line::from(Span::styled(
+        format!("Active Pipeline: {}", app.active_pipeline.name),
+        Style::default()
+            .fg(Color::Cyan)
+            .add_modifier(Modifier::BOLD),
+    )));
     lines.push(Line::from(app.active_pipeline.description.clone()));
     lines.push(Line::from(""));
 
-    lines.push(Line::from(Span::styled("Pipeline Step Sequence:", Style::default().fg(Color::Yellow))));
+    lines.push(Line::from(Span::styled(
+        "Pipeline Step Sequence:",
+        Style::default().fg(Color::Yellow),
+    )));
     for (idx, step) in app.active_pipeline.steps.iter().enumerate() {
         lines.push(Line::from(format!(
             " Step {}: {} (Plugin: {}, Profile: {:?}, Timeout: {}s)",
