@@ -265,17 +265,29 @@ sequenceDiagram
 
 ## 📦 Installation
 
-### Direct One-Liner Install (Recommended)
+### One-Liner Quick Install / Reinstall / Uninstall
 
-**Linux / macOS:**
-```bash
-curl -fsSL https://raw.githubusercontent.com/Ghost-101-ui/Zephyx/main/scripts/install.sh | sh
-```
+#### 🐧 Linux & macOS
 
-**Windows (PowerShell):**
-```powershell
-irm https://raw.githubusercontent.com/Ghost-101-ui/Zephyx/main/scripts/install.ps1 | iex
-```
+* **Install / Reinstall**:
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/Ghost-101-ui/Zephyx/main/scripts/install.sh | sh
+  ```
+* **Uninstall / Remove**:
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/Ghost-101-ui/Zephyx/main/scripts/uninstall.sh | sh
+  ```
+
+#### 🪟 Windows (PowerShell)
+
+* **Install / Reinstall**:
+  ```powershell
+  irm https://raw.githubusercontent.com/Ghost-101-ui/Zephyx/main/scripts/install.ps1 | iex
+  ```
+* **Uninstall / Remove**:
+  ```powershell
+  irm https://raw.githubusercontent.com/Ghost-101-ui/Zephyx/main/scripts/uninstall.ps1 | iex
+  ```
 
 ### Prerequisites
 
